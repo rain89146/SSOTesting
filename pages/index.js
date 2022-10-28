@@ -1,31 +1,39 @@
 import Head from "next/head";
-import Image from "next/image";
+import { useState } from "react";
+import { UseLoginContext } from "../context/loginContext";
 import styles from "../styles/Home.module.css";
 
-async function generateUrl () {
-	const fetchPromise = () => new Promise((resolve, reject) => {
-		fetch('http://localhost:3000/api/v1/veronica/generateloginurl', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Basic ${process.env.NEXT_PUBLIC_AUTH_ID}:${process.env.NEXT_PUBLIC_AUTH_SECRET}`
-			},
-			body: JSON.stringify({
-				uriName: "coglogin",
-				responseType: "code",
-				state: ""
-			})
-		}).then(res => resolve(res)).catch(error=>{ reject(error) })
-	});
-
-	const {result, response} = await fetchPromise().then(res=>res.json()).catch(error=>{ return error });
+export default function Home() {
 	
-	if (result) {
+	//  load context
+	const loginContext = UseLoginContext();
+
+	//
+	const [Error, setError] = useState(null)
+
+	//
+	async function generateUrl () {
+		
+		//	generate login url
+		const {result, response, message} = await loginContext.generateLoginUrl();
+	
+		//	
+		if (!result){ 
+			setError(message);
+			return;
+		}
+			
+		//
+		if (!response?.url) {
+			setError("Unable to resolve the request, please try again later");
+			return;
+		}
+		
+		//
 		window.location.href = response.url;
 	}
-}
 
-export default function Home() {
+	//
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -41,6 +49,7 @@ export default function Home() {
 						<p>Find in-depth information about Next.js features and API.</p>
 					</div>
 				</div>
+				<div>{Error}</div>
 			</main>
 		</div>
 	);

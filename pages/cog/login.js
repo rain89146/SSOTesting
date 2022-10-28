@@ -1,54 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
-import { useLoginContext } from '../../context/loginContext';
+import { UseLoginContext } from '../../context/loginContext';
+import style from './style.module.scss';
 
-/**
- * Exchange token with code
- * @param {*} code 
- * @param {*} successCallback 
- * @param {*} failCallback 
- */
-async function exchangeToken (code, successCallback, failCallback) 
-{
-	//	exchange token with code
-	const fetchPromise = () => new Promise((resolve, reject) => {
-		fetch(`http://localhost:3000/api/v1/veronica/tokenexchange`, {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Basic ${process.env.NEXT_PUBLIC_AUTH_ID}:${process.env.NEXT_PUBLIC_AUTH_SECRET}`
-			},
-			body: JSON.stringify({
-				code: code
-			})
-		}).then(res => resolve(res)).catch(error=>{ reject(error) })
-	});
-
-	//	fecting token
-	const {result, response, message, exception} = await fetchPromise().then(res=>res.json()).catch(error=>{ return error });
-
-	//
-	(result && response)
-	? successCallback(response)
-	: failCallback(message);
-}
-
-export default function login() {
+export default function Login() {
 
     //
     const router = useRouter();
 
 	//
-	const loginContext = useLoginContext();
+	const loginContext = UseLoginContext();
 
 	//	
 	const [Message, setMessage] = useState("Redirecting, please wait");
+	const [LoadingStatus, setLoadingStatus] = useState(true);
 
     //
     useEffect(() => {
 
 		//
-		if(!router.isReady) return;
+		if (!router.isReady) return;
 
 		//  parse from query
 		const {code, token, state} = router.query;
@@ -56,40 +27,82 @@ export default function login() {
 		//	get token from storage
 		const accessToken = loginContext.storage.readStorage('accessToken');
 
+		//	default redirect
+		let reidrectTo = '/home';
+
+		//	if state is decleared, do some state handling here
+		if (state) {
+			reidrectTo += `?state=${state}`
+		}
+
 		//	if it's logged in
 		if (accessToken) {
-			router.push('/home');
+			router.push(reidrectTo);
 			return;
 		}
 
-		//	has code
+		//	get access token via Code option
 		if(code) {
-			exchangeToken (code, (res) => {
+			const getToken = async () => {
 
-				//	update the reducer
-				for(let i in res) {
-					loginContext.setState(i, res[i]);
+				//
+				const {result, response, message, exception} = await loginContext.exchangeToken(code);
+				
+				//
+				if (result && response) {
+
+					//	update the reducer
+					for(let i in response) {
+						loginContext.setState(i, response[i]);
+					}
+
+					//	redirect to home
+					router.push(reidrectTo);
 				}
+				else {
 
-				//	redirect to home
-				router.push('/home');
-			}, error => {
-
-				//	render error
-				setMessage(error)
-			});
+					//	render error
+					setMessage(message);
+					setLoadingStatus(false);
+				}
+			}
+			getToken();
+			return;
 		}
 
-		//	has token
+		//	get access token via Token option
 		if (token) {
 			loginContext.storage.createStorage('accessToken', token);
-			router.push('/home');
+			router.push(reidrectTo);
+			return;
 		}
+
+		//	render error
+		setMessage("Permission Denied");
+		setLoadingStatus(false);
 			
     }, [router.query])
     
+	//
+    return <LoginLoadingScreen message={Message} status={LoadingStatus} />
+}
 
-    return (
-        <div>{Message}</div>
-    )
+//	loading screen
+function LoginLoadingScreen ({ message, status })
+{
+
+	const waitingMessage = (
+		<div className={style.waitingMessage}>
+			<div>{message}</div>
+		</div>
+	);
+
+	const errorMessage = (
+		<div className={style.errorMessage}>
+			<div>{message}</div>
+		</div>
+	)
+
+	//
+	return (status) ? waitingMessage : errorMessage;
 }

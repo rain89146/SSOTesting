@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useLoginContext } from '../context/loginContext';
+import { UseLoginContext } from '../context/loginContext';
 
-export default function home() {
+export default function Home() {
 
     //  load context
-	const loginContext = useLoginContext();
+	const loginContext = UseLoginContext();
 
     //  declear
     const [UserName, setUserName] = useState("");
@@ -30,10 +30,24 @@ export default function home() {
         }
 
         //
-        getUserInfo();
+        if(accessToken) getUserInfo();
 
-    }, [])
+    }, []);
+
+    //
+    const signout = () => {
+        console.log('signing out')
+    }
     
     //  render
-    return (Error) ? (<div>{Error}</div>) : (<div>welcome home, user: {UserName}</div>)
+    return (Error) ? (<div>{Error}</div>) : (UserName) ? 
+    (
+        <div>
+            <div>welcome home, user: {UserName}</div>
+            <div>
+                <button onClick={()=>signout()}>sign out</button>
+            </div>
+        </div>
+    ) : 
+    (<div>Something went wrong, please login again.</div>)
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
 import { UseLoginContext } from '../../context/loginContext';
 import style from './style.module.scss';
+import Layout from '../../component/layout';
 
 export default function Login() {
 
@@ -104,5 +105,5 @@ function LoginLoadingScreen ({ message, status })
 	)
 
 	//
-	return (status) ? waitingMessage : errorMessage;
+	return <Layout>{(status) ? waitingMessage : errorMessage}</Layout>
 }

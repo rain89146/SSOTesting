@@ -87,11 +87,28 @@ const LoginContextProvider = props => {
         return await fetchPromise().then(res=>res.json()).catch(error=>{ return error });
     }
 
+    //  log out
+    const logOut = async (token) => {
+        const fetchPromise = () => new Promise((resolve, reject) => {
+            fetch(`http://localhost:3000/api/v1/server/logout`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    accessToken: token
+                })
+            }).then(res => resolve(res)).catch(error=>{ reject(error) })
+        });
+        return await fetchPromise().then(res=>res.json()).catch(error=>{ return error });
+    }
+
     //
     return (
         <LgoinContext.Provider value={{
             loginState,
             storage,
+            logOut,
             setState,
             exchangeToken,
             generateLoginUrl,

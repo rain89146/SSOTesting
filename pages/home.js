@@ -1,8 +1,12 @@
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react'
 import Layout from '../component/layout';
 import { UseLoginContext } from '../context/loginContext';
 
 export default function Home() {
+
+    //
+    const router = useRouter();
 
     //  load context
 	const loginContext = UseLoginContext();
@@ -10,6 +14,7 @@ export default function Home() {
     //  declear
     const [UserName, setUserName] = useState("");
     const [Error, setError] = useState("");
+    const [Loading, setLoading] = useState(true);
 
     //  load user info when on load
     useEffect(() => {
@@ -18,11 +23,21 @@ export default function Home() {
         const accessToken = loginContext.storage.readStorage('accessToken');
 
         //
+        if (!accessToken) {
+            setLoading(false);
+            setError("No session was found.");
+            return;
+        }
+
+        //  get user info
         const getUserInfo = async () => {
 
             //  get user info by using access tojen
             const {result, response, message} = await loginContext.getUserInformation(accessToken);
             
+            //  when finish loading
+            setLoading(false);
+
             //  nothing went wrong
             if (result && response?.Username) setUserName(response.Username);
 
@@ -35,22 +50,78 @@ export default function Home() {
 
     }, []);
 
-    //
-    const signout = () => {
-        console.log('signing out')
+    //  user signout
+    const signout = async () => {
+
+        //
+        setLoading(true);
+        
+        //  load access token from local storage
+        const accessToken = loginContext.storage.readStorage('accessToken');
+
+        //  
+        const {result, response, message} = await loginContext.logOut(accessToken);
+
+        //
+        setLoading(false);
+
+        //
+        if(result === true && response?.isLoggedOut === true) {
+            loginContext.storage.clearStorage('accessToken');
+            router.push('/');
+        }
+
+        //  something went wrong
+        if (result === false && message) setError(message);
     }
-    
-    //  render
-    const context = (Error) ? (<div>{Error}</div>) : (UserName) ? 
-    (
+
+    //
+    const goHome = () => router.push('/');
+
+    //
+    const context = (Loading) ? (<LoadingScreen/>) : (Error) ? <ErrorScreen error={Error} goHome={goHome}/> : <UserLoggedInScreen UserName={UserName} signout={signout} goHome={goHome}/>;
+
+    //
+    return <Layout>{context}</Layout>
+}
+
+//  user logged in screen
+function UserLoggedInScreen({UserName, signout, goHome}) {
+    return (UserName) ? (
         <div>
             <div>welcome home, user: {UserName}</div>
             <div>
                 <button onClick={()=>signout()}>sign out</button>
             </div>
         </div>
-    ) : 
-    (<div>Something went wrong, please login again.</div>)
+    ) :
+    (
+        <div>
+            <div>Something went wrong, please login again.</div>
+            <div>
+                <button onClick={()=>goHome()}>Login again</button>
+            </div>
+        </div>
+    )
+}
 
-    return <Layout>{context}</Layout>
+//  error screen
+function ErrorScreen({error, goHome}) {
+    return (
+        <div>
+            <div>{error}</div>
+            <div>
+                <button onClick={()=>goHome()}>Login again</button>
+            </div>
+        </div>
+    )
+}
+
+//  loading screen
+function LoadingScreen() {
+    return (
+        <div>
+            We are processing your request, please wait
+        </div>
+    )
 }

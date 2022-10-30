@@ -29,7 +29,7 @@ export default function Home() {
             return;
         }
 
-        //
+        //  get user info
         const getUserInfo = async () => {
 
             //  get user info by using access tojen
@@ -50,9 +50,9 @@ export default function Home() {
 
     }, []);
 
-    //
+    //  user signout
     const signout = async () => {
-        
+
         //
         setLoading(true);
         
@@ -85,6 +85,7 @@ export default function Home() {
     return <Layout>{context}</Layout>
 }
 
+//  user logged in screen
 function UserLoggedInScreen({UserName, signout, goHome}) {
     return (UserName) ? (
         <div>
@@ -104,6 +105,7 @@ function UserLoggedInScreen({UserName, signout, goHome}) {
     )
 }
 
+//  error screen
 function ErrorScreen({error, goHome}) {
     return (
         <div>
@@ -115,6 +117,7 @@ function ErrorScreen({error, goHome}) {
     )
 }
 
+//  loading screen
 function LoadingScreen() {
     return (
         <div>

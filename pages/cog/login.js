@@ -33,7 +33,7 @@ export default function Login() {
 
 		//	if state is decleared, do some state handling here
 		if (state) {
-			reidrectTo += `?state=${state}`
+			reidrectTo += `?state=${state}`;
 		}
 
 		//	if it's logged in

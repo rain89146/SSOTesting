@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Layout from '../component/layout';
 import { UseLoginContext } from '../context/loginContext';
 
 export default function Home() {
@@ -40,7 +41,7 @@ export default function Home() {
     }
     
     //  render
-    return (Error) ? (<div>{Error}</div>) : (UserName) ? 
+    const context = (Error) ? (<div>{Error}</div>) : (UserName) ? 
     (
         <div>
             <div>welcome home, user: {UserName}</div>
@@ -50,4 +51,6 @@ export default function Home() {
         </div>
     ) : 
     (<div>Something went wrong, please login again.</div>)
+
+    return <Layout>{context}</Layout>
 }

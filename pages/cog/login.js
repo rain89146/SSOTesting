@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { UseLoginContext } from '../../context/loginContext';
 import style from './style.module.scss';
 import Layout from '../../component/layout';
-import moment from 'moment';
 
 export default function Login() {
 

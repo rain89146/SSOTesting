@@ -22,6 +22,23 @@ const LoginContextProvider = props => {
         }
         dispatch({stateName: name, payload: value})
     }
+    
+    //  store access token
+    const storeAccessToken = (token, expiresIn) => {
+        storage.createStorage('accessToken', token);
+        console.warn(expiresIn)
+        storage.createCookie('accessToken', token, expiresIn);
+    }
+
+    //  read access token
+    const getAccessToken = () => {
+        return storage.readCookie('accessToken');
+    }
+
+    //
+    const removeAccessToken = () => {
+        storage.clearCookie('accessToken');
+    }
 
     //  generate login url
     const generateLoginUrl = async () => {
@@ -111,6 +128,9 @@ const LoginContextProvider = props => {
             logOut,
             setState,
             exchangeToken,
+            getAccessToken,
+            removeAccessToken,
+            storeAccessToken,
             generateLoginUrl,
             getUserInformation,
         }}>{props.children}</LgoinContext.Provider>

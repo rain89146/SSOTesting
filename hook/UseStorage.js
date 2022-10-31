@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 /**
  * Use storage hook
  * @returns 
@@ -34,7 +36,45 @@ export default function UseStorage() {
         localStorage.removeItem(name);
     }
 
+    /**
+     * Create cookie
+     * @param {*} name 
+     * @param {*} value 
+     * @param {*} expires 
+     */
+    function createCookie(name, value, expires) {
+        Cookies.set(name, value, {
+            path: '/',
+            domain: 'localhost',
+            expires: expires,
+            secure: false
+        })
+    }
+    
+    /**
+     * Read cookie
+     * @param {*} name 
+     * @returns 
+     */
+    function readCookie(name) {
+        return Cookies.get(name);
+    }
+
+    /**
+     * Clear cookie
+     * @param {*} name 
+     */
+    function clearCookie(name) {
+        Cookies.remove(name, {
+            path: '/',
+            domain: 'localhost'
+        })
+    }
+
     return {
+        createCookie,
+        readCookie,
+        clearCookie,
         createStorage,
         readStorage,
         clearStorage

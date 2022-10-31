@@ -40,7 +40,7 @@ export default function Home() {
 			<h1 className={styles.title}>Website A</h1>
 			<div className={styles.grid}>
 				<div className={styles.card} onClick={()=>generateUrl()}>
-					<h2>Generate Login Url</h2>
+					<h2>Login into your account</h2>
 					<p>Find in-depth information about Next.js features and API.</p>
 				</div>
 			</div>

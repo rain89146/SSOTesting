@@ -20,7 +20,7 @@ export default function Home() {
     useEffect(() => {
         
         //  load access token from local storage
-        const accessToken = loginContext.storage.readStorage('accessToken');
+        const accessToken = loginContext.getAccessToken();
 
         //
         if (!accessToken) {
@@ -57,7 +57,7 @@ export default function Home() {
         setLoading(true);
         
         //  load access token from local storage
-        const accessToken = loginContext.storage.readStorage('accessToken');
+        const accessToken = loginContext.getAccessToken();
 
         //  
         const {result, response, message} = await loginContext.logOut(accessToken);
@@ -67,7 +67,7 @@ export default function Home() {
 
         //
         if(result === true && response?.isLoggedOut === true) {
-            loginContext.storage.clearStorage('accessToken');
+            loginContext.removeAccessToken();
             router.push('/');
         }
 

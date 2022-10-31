@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { UseLoginContext } from '../../context/loginContext';
 import style from './style.module.scss';
 import Layout from '../../component/layout';
+import moment from 'moment';
 
 export default function Login() {
 
@@ -23,10 +24,10 @@ export default function Login() {
 		if (!router.isReady) return;
 
 		//  parse from query
-		const {code, token, state} = router.query;
+		const {code, state} = router.query;
 
 		//	get token from storage
-		const accessToken = loginContext.storage.readStorage('accessToken');
+		const accessToken = loginContext.getAccessToken();
 
 		//	default redirect
 		let reidrectTo = '/home';
@@ -44,11 +45,12 @@ export default function Login() {
 
 		//	get access token via Code option
 		if(code) {
+
 			const getToken = async () => {
 
 				//
 				const {result, response, message, exception} = await loginContext.exchangeToken(code);
-				
+
 				//
 				if (result && response) {
 
@@ -56,6 +58,9 @@ export default function Login() {
 					for(let i in response) {
 						loginContext.setState(i, response[i]);
 					}
+
+					//	
+					loginContext.storeAccessToken(response.accessToken, new Date(response.exp));
 
 					//	redirect to home
 					router.push(reidrectTo);
@@ -68,13 +73,6 @@ export default function Login() {
 				}
 			}
 			getToken();
-			return;
-		}
-
-		//	get access token via Token option
-		if (token) {
-			loginContext.storage.createStorage('accessToken', token);
-			router.push(reidrectTo);
 			return;
 		}
 
